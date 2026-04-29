@@ -1,65 +1,522 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>这里有你喜欢的小说</title>
-     <style>
-        .box{
-            height: 220px;
-            width: 200px;
-            background-color: yellow;
-            position: fixed;
-            right: 0;
-            top: 350px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            animation: blink 0.8s infinite alternate;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>祝我的RBB大宝贝生日快乐💐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
         }
-        @keyframes blink{
-            from{
-                background-color: yellow;
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #cf52b0 0%, #c596ba 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* align-items: center; */
+            padding: 1.5rem;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* 主容器 — 背景内容区域 */
+        .main-content {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(8px);
+            border-radius: 3rem;
+            padding: 2rem 2rem 2.5rem;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            max-width: 700px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .main-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF, #c0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .main-content p {
+            color: #cdd9ff;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .card-info {
+            background: rgba(0,0,0,0.4);
+            border-radius: 2rem;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid #ff2a6d;
+        }
+
+        .card-info p {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* 倒计时弹窗 - 浮动在右下角 */
+        .countdown-floating {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 2000;
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.35s ease, visibility 0.35s, transform 0.3s ease;
+            max-width: 380px;
+            width: calc(100% - 40px);
+        }
+
+        .countdown-floating.hidden {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(50px);
+        }
+
+        /* 弹窗卡片样式 - 紧凑型右下角卡片 */
+        .countdown-card {
+            background: rgba(55, 78, 113, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 1.2rem 1.5rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 80, 120, 0.6);
+            animation: slideInRight 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: default;
+        }
+
+        @keyframes slideInRight {
+            0% {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
                 opacity: 1;
             }
-            to{
-                background-color: bisque;
-                opacity: 0.3;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.8rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #ffb347, #FF6B6B);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .target-date {
+            font-size: 0.7rem;
+            background: rgba(68, 137, 180, 0.3);
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 60px;
+            color: #f3ac55;
+            font-weight: 500;
+        }
+
+        /* 紧凑倒计时 */
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1rem 0 0.8rem;
+        }
+
+        .time-block {
+            background: #db407bca;
+            border-radius: 20px;
+            padding: 0.5rem 0.2rem;
+            min-width: 65px;
+            box-shadow: inset 0 1px 2px rgba(139, 32, 32, 0.5), 0 4px 10px rgba(67, 60, 60, 0.2);
+            border-bottom: 2px solid #d42992;
+        }
+
+        .time-number {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: monospace;
+            background: linear-gradient(135deg, #fff, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+        }
+
+        .time-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: #a9bfe6;
+            margin-top: 0.2rem;
+        }
+
+        .countdown-message {
+            margin-top: 0.8rem;
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.4);
+            padding: 0.4rem;
+            border-radius: 40px;
+            color: #f0f3fa;
+        }
+
+        .btn-redirect {
+            margin-top: 1rem;
+            background: linear-gradient(95deg, #de1a65, #ca4d73);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(255, 46, 99, 0.3);
+            border: 1px solid rgba(255,255,200,0.5);
+        }
+
+        .btn-redirect:hover {
+            transform: scale(1.02);
+            background: linear-gradient(95deg, #ff1e55, #ff7620);
+        }
+
+        .btn-redirect:active {
+            transform: scale(0.98);
+        }
+
+        .note-text {
+            font-size: 0.6rem;
+            margin-top: 0.8rem;
+            opacity: 0.6;
+            color: #ccc;
+        }
+
+        /* 底部装饰 */
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.7rem;
+            color: #7f8fa4;
+        }
+
+        /* 可选的关闭按钮（小叉） */
+        .close-floating {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(0,0,0,0.4);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .close-floating:hover {
+            background: #ff2e63;
+            opacity: 1;
+        }
+
+        @media (max-width: 550px) {
+            .countdown-floating {
+                bottom: 10px;
+                right: 10px;
+                max-width: 340px;
+            }
+            .time-block {
+                min-width: 55px;
+            }
+            .time-number {
+                font-size: 1.6rem;
             }
         }
-        h1{
-            text-align: center;
-            border: 2px dashed plum;
-            border-radius: 8px;
-            padding: 10px 20px;
-            margin: 30px;
-            background-color:pink;
-            /* box-shadow: 0 2px 4px rgba(132, 27, 88, 0.1); */
-        }
-     </style>
+    </style>
 </head>
 <body>
-    <h1>屋檐下的余温与荒芜</h1>
-    <div class="border" style="background-color: bisque; padding: 20px;">
-        小美和沛沛住了三年，从挤在一张小床上说悄悄话，到分享彼此所有的秘密，她们以为那是闺蜜间的极致亲近，直到小美的心动失控，沛沛的逃避拉扯，把这份屋檐下的暖意，熬成了蚀骨的虐。<br><br>
-小美的心动，藏在无数个越界的瞬间里。是沛沛酒后抱着她撒娇，鼻尖蹭着她的脖颈，呼吸灼热；是她发烧时，沛沛整夜守在床边，指尖一遍遍抚过她的额头，眼神温柔得让人心颤；是每次沛沛和男友吵架，扑进她怀里哭，眼泪打湿她的衬衫，她攥着沛沛的腰，克制着想要低头吻她的冲动，指甲深深嵌进掌心。<br><br>
-她开始变得偏执又卑微。会偷偷翻看沛沛和男友的聊天记录，看着那些亲昵的字眼，心脏像被钝器反复敲打；会在沛沛约会回来，强装不在意地帮她卸口红，指尖触到沛沛柔软的唇瓣，瞬间僵硬，却只能假装是无意；会在深夜，看着身边熟睡的沛沛，轻轻抚摸她的发梢，一遍遍地在心里说“我喜欢你”，天亮后又恢复成那个无所不能的“好闺蜜”。<br><br>
-沛沛不是傻子，她早就察觉到了异常。她享受小美的偏爱，依赖这份无可替代的温柔，却又恐惧这份超出友谊的情愫——她是直女，有稳定交往的男友，即将谈婚论嫁，她不敢承认，更不敢面对自己心底那点莫名的悸动。于是她开始刻意躲避，不再和小美同床共枕，不再让她碰自己的头发，甚至故意在小美面前和男友视频，说尽亲昵的话。<br><br>
-冲突在一个深夜彻底爆发。沛沛和男友闹分手，醉醺醺地回到家，看到小美坐在沙发上等她，眼底的心疼藏都藏不住。“你别用那种眼神看我，”沛沛一把挥开小美伸过来的手，语气刻薄，“小美，你是不是有病？我是直的，我不可能和你有什么，你能不能别再纠缠我？”<br><br>
-小美的脸瞬间惨白，积压了太久的情绪彻底崩溃，她抓住沛沛的手腕，声音嘶哑又绝望：“纠缠？沛沛，我看着你和别人恩爱，看着你规划没有我的未来，我快疯了！我喜欢你，从很久很久以前就喜欢，我控制不住！”<br><br>
-沛沛浑身一震，手腕被攥得生疼，眼泪突然掉了下来。她想推开小美，却被小美用力抱进怀里，那个拥抱带着绝望的力道，仿佛要把她揉进骨血里。小美低头，吻住了她的唇，带着隐忍的泪水和孤注一掷的疯狂，沛沛僵在原地，没有推开，也没有回应，眼泪无声地滑落，心里是翻涌的混乱和痛苦——她怕这份禁忌的感情，更怕失去小美。<br><br>
-那个吻，成了两人之间无法逾越的鸿沟。第二天醒来，沛沛躲进房间，不肯见小美，小美坐在客厅，一夜未眠，眼底满是悔恨和卑微。她主动道歉，说自己一时冲动，以后会彻底收起心意，只做她的闺蜜。<br><br>
-可有些东西，一旦破界，就再也回不去了。沛沛开始频繁和男友复合，故意在小美面前秀恩爱，却在转身时，看着小美落寞的背影偷偷掉泪；小美开始刻意疏远，每天早出晚归，甚至刻意加班到深夜，宁愿在公司睡沙发，也不愿回到那个充满回忆、让她痛苦的屋檐。<br><br>
-直到沛沛决定搬去和男友同住的那天，小美默默帮她收拾行李，全程一言不发。沛沛看着她泛红的眼眶，突然开口：“小美，对不起。”小美摇摇头，声音哽咽：“祝你幸福，以后，再也不用委屈自己了。”<br><br>
-沛沛走后，小美留在空荡荡的房子里，看着两人曾经的合照，看着沛沛留下的发绳，终于崩溃大哭。她知道，她们终究是错过了，一个不敢爱，一个爱不起，这份藏在屋檐下的禁忌之恋，最终只能沦为一场无人知晓的虐心遗憾，只剩满屋的余温，和心底永远的荒芜。
+
+<div class="main-content">
+    <h1>💕生日倒计时🎁</h1>
+    <p>期待与你的重逢❤️I Miss You😭</p>
+    <div class="card-info">
+        <p>🎉独属于你的惊喜：<br><strong id="displayTargetDate">加载中...</strong></p>
+        <p>⏳请耐心等待倒计时归零😄</p>
+        <p>当然你也可以直接点击前往，但我完全不建议❌️</p>
     </div>
-    <div class="box">
-        <h3>超劲爆动作大片🚨</h3>
-         <a href="YELLOW.html" target="_blank">
-             <img src="funny picture.jpg" alt="CLICK！！！" width="80"><br>
-             两女子在宿舍床上<br>做出不雅行为📷
-         </a>
+    <div class="footer" style="color: #cdd9ff;">
+        倒计时结束瞬间将会有惊喜出现🎬
     </div>
+</div>
+
+<!-- 倒计时弹窗 - 浮动在右下角 -->
+<div id="countdownFloating" class="countdown-floating">
+    <div class="countdown-card">
+        <div class="card-header">
+            <span class="modal-title">👧 距你的生日 ⭐</span>
+            <span class="target-date" id="modalTargetDate">2026年5月1日</span>
+        </div>
+        <div class="countdown-timer" id="timerContainer">
+            <div class="time-block"><div class="time-number" id="days">00</div><div class="time-label">天</div></div>
+            <div class="time-block"><div class="time-number" id="hours">00</div><div class="time-label">时</div></div>
+            <div class="time-block"><div class="time-number" id="minutes">00</div><div class="time-label">分</div></div>
+            <div class="time-block"><div class="time-number" id="seconds">00</div><div class="time-label">秒</div></div>
+        </div>
+        <div class="countdown-message" id="statusMsg">
+            🌟距离你的20岁第一天开启还有
+        </div>
+        <button id="jumpBtn" class="btn-redirect">🎬 立即预览惊喜 🎬</button>
+        <div class="note-text">倒计时归零将自动弹出惊喜 | 点击按钮可提前偷窥</div>
+    </div>
+</div>
+
+<script>
+    
+    (function() {
+        // ---------- 配置区域 ----------
+        const TARGET_YEAR = 2026;
+        const TARGET_MONTH = 3;      // 5月 (0=1月,4=5月)
+        const TARGET_DAY = 29;
+        const TARGET_HOUR = 21;
+        const TARGET_MINUTE = 25;
+        const TARGET_SECOND = 0;
+        const DOUYIN_VIDEO_URL = "https://www.douyin.com/video/7603225614669966438";
+        
+        const targetDateObj = new Date(TARGET_YEAR, TARGET_MONTH, TARGET_DAY, TARGET_HOUR, TARGET_MINUTE, TARGET_SECOND);
+        const targetDateStr = `${TARGET_YEAR}年${TARGET_MONTH+1}月${TARGET_DAY}日`;
+        
+        const displayTargetSpan = document.getElementById('displayTargetDate');
+        const modalTargetSpan = document.getElementById('modalTargetDate');
+        if (displayTargetSpan) displayTargetSpan.innerText = targetDateStr;
+        if (modalTargetSpan) modalTargetSpan.innerText = targetDateStr;
+        
+        const floatingModal = document.getElementById('countdownFloating');
+        const daysSpan = document.getElementById('days');
+        const hoursSpan = document.getElementById('hours');
+        const minutesSpan = document.getElementById('minutes');
+        const secondsSpan = document.getElementById('seconds');
+        const statusMsgDiv = document.getElementById('statusMsg');
+        const jumpBtn = document.getElementById('jumpBtn');
+        
+        let hasAutoRedirected = false;
+        let countdownInterval = null;
+        
+        // function redirectToDouyin() {
+        //     if (!DOUYIN_VIDEO_URL) {
+        //         console.warn("未配置抖音视频链接");
+        //         alert("未配置有效的抖音视频链接，请联系管理员配置。");
+        //         return;
+        //     }
+        //     window.location.href = DOUYIN_VIDEO_URL;
+        // }
+        
+        // 显示自定义祝福弹窗
+function showBirthdayBlessing(callback) {
+    // 创建弹窗元素
+    const blessingModal = document.createElement('div');
+    blessingModal.innerHTML = `
+        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:10000;">
+            <div style="background:linear-gradient(145deg, #ff9a9e, #fad0c4); border-radius:60px; padding:2rem; text-align:center; max-width:350px; animation:bounceIn 0.4s ease;">
+                <h2 style="font-size:2rem; margin-bottom:1rem; color:#fff;">😊 噜噜宝贝来</h2>
+                <p style="font-size:1.5rem; margin-bottom:1.5rem; color:#fff; font-weight:bold;">祝你生日快乐啦 🎂</p>
+                <button id="blessingConfirmBtn" style="background:#ff6b6b; border:none; padding:0.8rem 2rem; border-radius:50px; font-size:1.2rem; font-weight:bold; color:white; cursor:pointer;">确定</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(blessingModal);
+    
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            80% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 绑定确定按钮事件
+    document.getElementById('blessingConfirmBtn').onclick = function() {
+        document.body.removeChild(blessingModal);
+        if (callback) callback();
+    };
+}
+
+// 修改跳转函数
+function redirectToDouyin() {
+    if (!DOUYIN_VIDEO_URL) {
+        console.warn("未配置抖音视频链接");
+        alert("未配置有效的抖音视频链接，请联系管理员配置。");
+        return;
+    }
+    
+    // 显示祝福弹窗，用户点击确定后再跳转
+    showBirthdayBlessing(function() {
+        window.open(DOUYIN_VIDEO_URL, '_blank');
+    });
+}
+        function updateCountdown() {
+            const now = new Date();
+            const targetTime = targetDateObj.getTime();
+            const diffMs = targetTime - now.getTime();
+            
+            if (diffMs <= 0) {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+                if (daysSpan) daysSpan.innerText = '00';
+                if (hoursSpan) hoursSpan.innerText = '00';
+                if (minutesSpan) minutesSpan.innerText = '00';
+                if (secondsSpan) secondsSpan.innerText = '00';
+                if (statusMsgDiv) statusMsgDiv.innerHTML = '🎯 终于等到！请收下你的生日惊喜 🎯';
+                
+                if (!hasAutoRedirected) {
+                    hasAutoRedirected = true;
+                    setTimeout(() => {
+                        if (floatingModal && !floatingModal.classList.contains('hidden')) {
+                            floatingModal.classList.add('hidden');
+                        }
+                        redirectToDouyin();
+                    }, 200);
+                }
+                return;
+            }
+            
+            let totalSeconds = Math.floor(diffMs / 1000);
+            const days = Math.floor(totalSeconds / 86400);
+            totalSeconds %= 86400;
+            const hours = Math.floor(totalSeconds / 3600);
+            totalSeconds %= 3600;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            if (daysSpan) daysSpan.innerText = days.toString().padStart(2, '0');
+            if (hoursSpan) hoursSpan.innerText = hours.toString().padStart(2, '0');
+            if (minutesSpan) minutesSpan.innerText = minutes.toString().padStart(2, '0');
+            if (secondsSpan) secondsSpan.innerText = seconds.toString().padStart(2, '0');
+            
+            if (statusMsgDiv && days === 0 && hours < 1) {
+                statusMsgDiv.innerHTML = '🔥 惊喜即将揭晓 🔥';
+            } else if (statusMsgDiv && days === 0) {
+                statusMsgDiv.innerHTML = '⏰ 就在今天，敬请期待 ⏰';
+            } else {
+                statusMsgDiv.innerHTML = '✨ 倒计时进行中 ✨';
+            }
+        }
+        
+        function initModalAndTimer() {
+            const nowTime = new Date().getTime();
+            const targetTime = targetDateObj.getTime();
+            const isExpired = nowTime >= targetTime;
+            
+            if (floatingModal) {
+                floatingModal.classList.remove('hidden');
+            }
+            
+            if (isExpired) {
+                if (daysSpan) daysSpan.innerText = '00';
+                if (hoursSpan) hoursSpan.innerText = '00';
+                if (minutesSpan) minutesSpan.innerText = '00';
+                if (secondsSpan) secondsSpan.innerText = '00';
+                if (statusMsgDiv) statusMsgDiv.innerHTML = '🎬 时间已到，立即观看视频 🎬';
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+                if (!hasAutoRedirected) {
+                    hasAutoRedirected = true;
+                    setTimeout(() => {
+                        if (floatingModal && !floatingModal.classList.contains('hidden')) {
+                            floatingModal.classList.add('hidden');
+                        }
+                        redirectToDouyin();
+                    }, 400);
+                }
+                return;
+            }
+            
+            updateCountdown();
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                updateCountdown();
+            }, 1000);
+        }
+        
+        function onManualRedirect() {
+            if (floatingModal && !floatingModal.classList.contains('hidden')) {
+                floatingModal.classList.add('hidden');
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            redirectToDouyin();
+        }
+        
+        if (jumpBtn) {
+            jumpBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!hasAutoRedirected) {
+                    hasAutoRedirected = true;
+                }
+                onManualRedirect();
+            });
+        }
+        
+        function handleVisibilityChange() {
+            if (!document.hidden) {
+                if (countdownInterval) {
+                    updateCountdown();
+                } else {
+                    const nowTime = new Date().getTime();
+                    const targetTime = targetDateObj.getTime();
+                    if (nowTime < targetTime && !hasAutoRedirected && floatingModal && !floatingModal.classList.contains('hidden')) {
+                        if (countdownInterval) clearInterval(countdownInterval);
+                        countdownInterval = setInterval(() => updateCountdown(), 1000);
+                        updateCountdown();
+                    }
+                }
+            }
+        }
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        initModalAndTimer();
+        
+        console.log(`倒计时目标: ${targetDateStr}, 抖音视频地址: ${DOUYIN_VIDEO_URL}`);
+    })();
+</script>
 </body>
 </html>
